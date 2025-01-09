@@ -53,10 +53,10 @@ def verify_certificate(server_cert):
     ca_socket.connect((CA_HOST, CA_PORT))
     
     ca_socket.send("CLIENT_VERIFY".encode() + b"\n" + server_cert.public_bytes(serialization.Encoding.PEM))
-    is_valid = ca_socket.recv(4096).decode()
+    response = ca_socket.recv(4096).decode()
     ca_socket.close()
     
-    return is_valid
+    return response
 
 
 # Клієнт
@@ -75,14 +75,15 @@ def run_client():
 
     # Отримання відповіді та сертифіката
     server_hello, server_cert = client_socket.recv(4096).split(b"\n", 1)
-    print(f"Клієнт отримав привітання.")
+    print(f"Клієнт отримав привітання і сертифікат.")
     server_cert = load_pem_x509_certificate(server_cert)
 
     # Перевірка сертифіката
-    if not verify_certificate(server_cert):
+    if verify_certificate(server_cert) != "VALID":
         print("Сертифікат не пройшов верифікацію.")
         client_socket.close()
         return
+    print("Сертифікат пройшов верифікацію.")
 
     # Генерація premaster і шифрування
     premaster_secret = secrets.token_hex(16).encode()
@@ -113,7 +114,7 @@ def run_client():
         client_socket.send(encrypted_message)
         
         if message.lower() == "exit":
-            print("Вихід з чату.")
+            print("Завершення чату.")
             break
 
         server_message = client_socket.recv(4096)

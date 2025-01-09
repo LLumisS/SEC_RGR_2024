@@ -103,7 +103,7 @@ def run_server():
     decrypted_message = decrypt_message(session_key, message)
     print(f"Клієнт відповів: {decrypted_message}.")
 
-    print("Сервер завершив рукостискання.")
+    print("Рукостискання завершено.")
 
     # Обмін повідомленнями
     while True:
