@@ -4,7 +4,6 @@ import os
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.x509 import load_pem_x509_certificate
-from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
@@ -105,6 +104,22 @@ def run_client():
     client_socket.send(encrypted_message)
 
     print("Рукостискання завершено.")
+    
+    # Обмін повідомленнями
+    while True:
+        message = input("Введіть повідомлення для сервера: ")
+        
+        encrypted_message = encrypt_message(session_key, message)
+        client_socket.send(encrypted_message)
+        
+        if message.lower() == "exit":
+            print("Вихід з чату.")
+            break
+
+        server_message = client_socket.recv(4096)
+        decrypted_message = decrypt_message(session_key, server_message)
+        print(f"Сервер: {decrypted_message}")
+
 
 if __name__ == "__main__":
     run_client()
